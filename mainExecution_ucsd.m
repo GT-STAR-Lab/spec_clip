@@ -153,67 +153,45 @@ for stateNum = [3:30, 3]
 
 
         %% Compute SUB (stable) [A, B] solution
-        % fprintf('Computing stable [A, B] solution using SUB ... \n');
-        % 
-        % timeSUB = tic;
-        % [A_SUB, ~] = learnSOCmodel(X_,Y_, options);
-        % tEnd = toc(timeSUB);
-        % 
-        % SOC_roll = rollout(A_SUB, X_(:, 1), size(X_, 2));
-        % SOC_error(seq + 1, :) = mean(abs(SOC_roll - gt));
-        % save(fullfile(save_state_directory, num2str(seq), 'A_SUB.mat'), "A_SUB");
-        % save(fullfile(save_state_directory, 'SOC_error.mat'), "SOC_error");
+        fprintf('Computing stable [A, B] solution using SUB ... \n');
 
+        timeSOC = tic;
+        [SOC, ~] = learnSOCmodel(X_,Y_, options);
+        tSOC = toc(timeSOC);
 
+        SOC_roll = rollout(SOC, X_(:, 1), size(X_, 2));
+        SOC_error(seq + 1, :) = mean(abs(SOC_roll - gt));
+        save(fullfile(save_state_directory, num2str(seq), 'SOC.mat'), "SOC");
+        save(fullfile(save_state_directory, 'SOC_error.mat'), "SOC_error");
 
-        % e_SUB = norm(Y_ - A_SUB*X_, 'fro')^2/2;
-        % maxeval_SUB = max(abs(eig(A_SUB)));
-        % 
-        % SOC_time(seq+1, stateNum - 2) = tEnd;
-        % % SOC_error(seq+1, stateNum - 2) = e_SUB;
-        % 
-        % if(maxeval_SUB <= 1)
-        %     SOC_stability(seq+1, stateNum - 2) = 1;
-        % end
-        % 
-        % save([save_directory, 'SOC_time.mat'], 'SOC_time');
-        % save([save_directory, 'SOC_error.mat'], 'SOC_error');
-        % save([save_directory, 'SOC_stability.mat'], 'SOC_stability');
-        % 
+        SOC_time(seq+1, stateNum - 2) = tSOC;
+
+        save([save_directory, 'SOC_time.mat'], 'SOC_time');
+
         % fprintf(' SOC   Max eigenvalue is : %.4f \n', maxeval_SUB);
         % fprintf(' SOC   Reconstruction error : %.5f \n', e_SUB);    
 
   %       %% Compute WLS (stable) [A, B] solution
   %       fprintf('Computing stable A solution using WLS ... \n');
   % 
-  %       Pnew = [X_(:,1), Y_];
-  %       [U_wls,S_wls,V_wls] = svd(Pnew,0);
-  % 
-  %       n = stateNum;
-  %       V_wls = V_wls(:,1:n);
-  %       S_wls = S_wls(1:n,1:n);
-  %       U_wls = U_wls(:,1:n);
-  % 
-  %       timeWLS = tic;
-  %       [A_WLS, ~, ~, ~] = learnWLSmodel(V_wls,S_wls,1,0);
-  %       tEnd = toc(timeWLS);
-  % 
-  %       WLS_roll = rollout(A_WLS, X_(:, 1), size(X_, 2));
-  %       WLS_error(seq + 1, :) = mean(abs(WLS_roll - gt));
-  %       save(fullfile(save_state_directory, num2str(seq), 'A_WLS.mat'), "A_WLS");
-  %       save(fullfile(save_state_directory, 'WLS_error.mat'), "WLS_error");
-  % 
-  %       e_WLS = norm(S_wls*V_wls(2:end,:)' - A_WLS * S_wls*V_wls(1:end-1,:)', 'fro')^2/2;
-  %       maxeval_WLS = max(abs(eig(A_WLS)));
-  %       if maxeval_WLS <= 1 
-  %           WLS_stability(seq+1, stateNum - 2) = 1;
-  %       end
-  %       % WLS_error(seq+1, stateNum - 2) = e_WLS;
-  %       WLS_time(seq+1, stateNum - 2) = tEnd;
-  % 
-  %       save([save_directory, 'WLS_time.mat'], 'WLS_time');
-  %       save([save_directory, 'WLS_error.mat'], 'WLS_error');
-  %       save([save_directory, 'WLS_stability.mat'], 'WLS_stability');
+        Pnew = [X_(:,1), Y_];
+        [U_wls,S_wls,V_wls] = svd(Pnew,0);
+
+        n = stateNum;
+        V_wls = V_wls(:,1:n);
+        S_wls = S_wls(1:n,1:n);
+        U_wls = U_wls(:,1:n);
+
+        timeWLS = tic;
+        [WLS, ~, ~, ~] = learnWLSmodel(V_wls,S_wls,1,0);
+        tWLS = toc(timeWLS);
+
+        WLS_roll = rollout(WLS, X_(:, 1), size(X_, 2));
+        WLS_error(seq + 1, :) = mean(abs(WLS_roll - gt));
+        save(fullfile(save_state_directory, num2str(seq), 'WLS.mat'), "WLS");
+        save(fullfile(save_state_directory, 'WLS_error.mat'), "WLS_error");
+        WLS_time(seq+1, stateNum - 2) = tWLS;
+        save([save_directory, 'WLS_time.mat'], 'WLS_time');
   % 
   %       fprintf('    Max eigenvalue is : %.4f \n', max(abs(eig(A_WLS)) ));
   %       fprintf('    Reconstruction error : %.5f \n', e_WLS);    
@@ -222,26 +200,20 @@ for stateNum = [3:30, 3]
   %       %% Compute CG (stable) [A, B] solution
   %       fprintf('Computing stable A using CG ... \n');
   % 
-  %       timeCG = tic;
-  %       [A_CG, ~, ~, ~] = learnCGModel(X_, Y_, 1, 0);
-  %       tEnd = toc(timeCG);
-  % 
-  %       CG_roll = rollout(A_CG, X_(:, 1), size(X_, 2));
-  %       CG_error(seq + 1, :) = mean(abs(CG_roll - gt));
-  %       save(fullfile(save_state_directory, num2str(seq), 'A_CG.mat'), "A_CG");
-  %       save(fullfile(save_state_directory, 'CG_error.mat'), "CG_error");
-  % 
-  %       e_CG = norm(Y_ - A_CG*X_, 'fro')^2/2;
-  %       maxeval_CG = max(abs(eig(A_CG)));
-  %       if maxeval_WLS <= 1 
-  %           CG_stability(seq+1, stateNum - 2) = 1;
-  %       end
-  %       % CG_error(seq+1, stateNum - 2) = e_CG;
-  %       CG_time(seq+1, stateNum - 2) = tEnd;
-  % 
-  %       save([save_directory, 'CG_time.mat'], 'CG_time');
-  %       save([save_directory, 'CG_error.mat'], 'CG_error');
-  %       save([save_directory, 'CG_stability.mat'], 'CG_stability');
+        timeCG = tic;
+        [CG, ~, ~, ~] = learnCGModel(X_, Y_, 1, 0);
+        tCG = toc(timeCG);
+
+        CG_roll = rollout(CG, X_(:, 1), size(X_, 2));
+        CG_error(seq + 1, :) = mean(abs(CG_roll - gt));
+        save(fullfile(save_state_directory, num2str(seq), 'CG.mat'), "CG");
+        save(fullfile(save_state_directory, 'CG_error.mat'), "CG_error");
+
+        CG_time(seq+1, stateNum - 2) = tEnd;
+        
+        save([save_directory, 'CG_time.mat'], 'CG_time');
+        save([save_directory, 'CG_error.mat'], 'CG_error');
+        save([save_directory, 'CG_stability.mat'], 'CG_stability');
   % 
   %       fprintf('    Max eigenvalue is : %.4f \n', maxeval_CG)
   %       fprintf('    Reconstruction error : %.5f \n', e_CG);    
