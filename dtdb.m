@@ -28,7 +28,7 @@
 clear; close all; clc; system = 'Franka';
 
 algorithms_path = 'algorithms/'; % path for stable LDS algorithms
-save_directory = 'results_svd/dtdb/';
+save_directory = 'results_dtdb/';
 
 mkdir(save_directory);
 

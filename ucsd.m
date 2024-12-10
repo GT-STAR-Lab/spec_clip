@@ -27,9 +27,8 @@
 
 clear; close all; clc; system = 'Franka';
 
-path_to_training_data = 'MemoryEfficientStableLDS-master/data/';
 algorithms_path = '../../algorithms/'; % path for stable LDS algorithms
-save_directory = 'results_svd/ucsd/';
+save_directory = 'results_ucsd/';
 
 addpath(algorithms_path);
 options.graphic = 0;

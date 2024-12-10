@@ -8,7 +8,7 @@
 %       The data-driven learning methods used are:
 %           1. Least-squares (LS) unconstrained (possibly unstable) A and B 
 %              matrix pair
-%           2. A learned matrix pair [A, B] with SUB, that simultaneously 
+%           2. A learned matrix pair [A, B] with SOC, that simultaneously 
 %              learns a stable A, and a B matrix. 
 %           3. A learned matirx pair [A, B] with WLS, that learns a stable 
 %              A, without updating the least-squares B matrix solution. 
@@ -20,16 +20,19 @@
 %       Given experimental data from the Franka manipulator, the code:
 %           1. Combines all data (discontinuous) runs into one file
 %           2. Computes the least-squares solution
-%           3. Computes the SUB, WLS, and CG stable solutions
+%           3. Computes the SOC, WLS, and CG stable solutions
 %           4. Calculates LQR gains for each method
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 clear; close all; clc; system = 'Franka';
 
-path_to_training_data = 'MemoryEfficientStableLDS-master/data/';
 algorithms_path = 'algorithms/'; % path for stable LDS algorithms
 save_directory = 'results_kodex/';
+data_directory = 'prepare_data/kodex';
+
+mkdir(save_directory);
+
 status = 0;
 
 addpath(algorithms_path);
@@ -39,43 +42,44 @@ options.maxiter = 200000;
 
 
 data_paths = {
-    % 'relocation_demo.mat', 
-    % 'relocation_failed.mat', 
-    % 'tool_original.mat', 
-    % 'tool_truncated_to_40.mat',
+    'relocation_demo.mat', 
+    'relocation_failed.mat', 
+    'tool_original.mat', 
+    'tool_truncated_to_40.mat',
     'tool_truncated_to_31.mat',
-    ['tool_truncated_to_35' ...
-    '' ...
-    '' ...
-    '.mat']};
+    'tool_truncated_to_35.mat'};
 
 for i = 1:length(data_paths)
     name = data_paths{i}(1:end-4);
-    load(data_paths{i});
-    load(['matrix_', data_paths{i}]);
+    load(fullfile(data_directory,data_paths{i}));
+    % load(['matrix_', data_paths{i}]);
 
     % X_ = X;
     % Y_ = Y;
 
+    timeLS = tic;
+    timeSC = tic;
+    LS = LDS(X.', Y.');
+    tLS = toc;
+
+    SC = eigenclip(LS, 1);
+    tSC = toc(timeSC);
+
     alg_name = 'ls';
     experiment_name = [name, '_', alg_name, '_'];
 
-    unclLS = LS;
+    save([save_directory, experiment_name, 'time', '.mat'], "tLS");
+    save([save_directory, experiment_name, 'matrix', '.mat'], "LS");
 
-    tStart = tic;
-    clLS = eigenclip(LS, 1);
-    tEnd = toc(tStart);
+    disp('LS SAVED');
 
-    save([save_directory, experiment_name, 'time', '.mat'], "tEnd");
-    save([save_directory, experiment_name, 'matrix', '.mat'], "unclLS");
-
-    disp('UNCLLS SAVED');
-
-    alg_name = 'clls';
+    alg_name = 'SC';
     experiment_name = [name, '_', alg_name, '_'];
-    save([save_directory, experiment_name, 'matrix', '.mat'], "clLS");
 
-    disp('CLLS SAVED');
+    save([save_directory, experiment_name, 'time', '.mat'], "tSC");
+    save([save_directory, experiment_name, 'matrix', '.mat'], "SC");
+
+    disp('SC SAVED');
 
     alg_name = 'soc';
     experiment_name = [name, '_', alg_name, '_'];
@@ -83,20 +87,14 @@ for i = 1:length(data_paths)
     X_ = X.';
     Y_ = Y.';
 
-    timeSUB = tic;
-    [A_SUB, ~] = learnSOCmodelKnowingLS(X_, Y_, LS, options);
-    tEnd = toc(timeSUB);
+    timeSOC = tic;
+    [SOC, ~] = learnSOCmodelKnowingLS(X_, Y_, LS, options);
+    tSOC = toc(timeSOC);
 
-    save([save_directory, experiment_name, 'time', '.mat'], "tEnd");
-    save([save_directory, experiment_name, 'matrix', '.mat'], "A_SUB");
+    save([save_directory, experiment_name, 'time', '.mat'], "tSOC");
+    save([save_directory, experiment_name, 'matrix', '.mat'], "SOC");
 
     disp('SOC SAVED');
-
-
-
-
-
-
 
 end
 
@@ -118,25 +116,25 @@ end
 % 
 % 
 %     for stateNum = 3:30
-%         subspace_S = data_S(1:stateNum, :);
-%         subspace_data = subspace_S * data_V.';
+%         SOCspace_S = data_S(1:stateNum, :);
+%         SOCspace_data = SOCspace_S * data_V.';
 %         disp(['dimension ', num2str(stateNum)])
-%         X_ = subspace_data(:, 1:end - 1);
-%         Y_ = subspace_data(:, 2:end);
+%         X_ = SOCspace_data(:, 1:end - 1);
+%         Y_ = SOCspace_data(:, 2:end);
 % 
 % 
 %         %% Compute LS (unconstrained) [A, B] solution
 %         fprintf('Computing LS unconstrained [A, B] solution ... \n');
 %         randomShuffling = false;
 %         tStart = tic;
-%         [clLS, unclLS] = LDS(X_, Y_);
+%         [SC, LS] = LDS(X_, Y_);
 %         tEnd = toc(tStart);
 %         disp(tEnd);
-%         cl_e_LS = norm(Y_ - clLS * X_, 'fro')^2/2;
-%         uncl_e_LS = norm(Y_ - unclLS * X_, 'fro')^2/2;
+%         cl_e_LS = norm(Y_ - SC * X_, 'fro')^2/2;
+%         uncl_e_LS = norm(Y_ - LS * X_, 'fro')^2/2;
 %         error(stateNum - 2) = uncl_e_LS;
-%         maxeval_LS = max(abs(eig(clLS)) );
-%         maxeval_LS_unclipped = max(abs(eig(unclLS)) );
+%         maxeval_LS = max(abs(eig(SC)) );
+%         maxeval_LS_unclipped = max(abs(eig(LS)) );
 % 
 %         if(maxeval_LS_unclipped <= 1)
 %             unclip_stability(seq+1, stateNum - 2) = 1;
@@ -164,20 +162,20 @@ end
 % 
 % 
 % 
-%         %% Compute SUB (stable) [A, B] solution
-%         fprintf('Computing stable [A, B] solution using SUB ... \n');
+%         %% Compute SOC (stable) [A, B] solution
+%         fprintf('Computing stable [A, B] solution using SOC ... \n');
 % 
-%         timeSUB = tic;
-%         [A_SUB, ~] = learnSOCmodel(X_,Y_, options);
-%         tEnd = toc(timeSUB);
+%         timeSOC = tic;
+%         [A_SOC, ~] = learnSOCmodel(X_,Y_, options);
+%         tEnd = toc(timeSOC);
 % 
-%         e_SUB = norm(Y_ - A_SUB*X_, 'fro')^2/2;
-%         maxeval_SUB = max(abs(eig(A_SUB)));
+%         e_SOC = norm(Y_ - A_SOC*X_, 'fro')^2/2;
+%         maxeval_SOC = max(abs(eig(A_SOC)));
 % 
 %         SOC_time(seq+1, stateNum - 2) = tEnd;
-%         SOC_error(seq+1, stateNum - 2) = e_SUB;
+%         SOC_error(seq+1, stateNum - 2) = e_SOC;
 % 
-%         if(maxeval_SUB <= 1)
+%         if(maxeval_SOC <= 1)
 %             SOC_stability(seq+1, stateNum - 2) = 1;
 %         end
 % 
@@ -185,8 +183,8 @@ end
 %         save([save_directory, 'SOC_error.mat'], 'SOC_error');
 %         save([save_directory, 'SOC_stability.mat'], 'SOC_stability');
 % 
-%         fprintf(' SOC   Max eigenvalue is : %.4f \n', maxeval_SUB);
-%         fprintf(' SOC   Reconstruction error : %.5f \n', e_SUB);    
+%         fprintf(' SOC   Max eigenvalue is : %.4f \n', maxeval_SOC);
+%         fprintf(' SOC   Reconstruction error : %.5f \n', e_SOC);    
 % 
 %         %% Compute WLS (stable) [A, B] solution
 %         % fprintf('Computing stable A solution using WLS ... \n');
