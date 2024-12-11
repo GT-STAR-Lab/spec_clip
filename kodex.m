@@ -29,7 +29,7 @@ clear; close all; clc; system = 'Franka';
 
 algorithms_path = 'algorithms/'; % path for stable LDS algorithms
 save_directory = 'results_kodex/';
-data_directory = 'prepare_data/kodex';
+data_directory = 'datasets/kodex';
 
 mkdir(save_directory);
 

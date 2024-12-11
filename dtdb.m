@@ -59,23 +59,23 @@ if(status == 0)
     SOC_time = zeros(254, 27);
     
 else
-    CG_error = load('results_svd/dtdb/CG_error.mat').CG_error;
-    CG_time = load('results_svd/dtdb/CG_time.mat').CG_time;
+    CG_error = load('results_dtdb/CG_error.mat').CG_error;
+    CG_time = load('results_dtdb/CG_time.mat').CG_time;
     
-    SC_error = load('results_svd/dtdb/SC_error.mat').SC_error;
-    SC_time = load('results_svd/dtdb/SC_time.mat').SC_time;
+    SC_error = load('results_dtdb/SC_error.mat').SC_error;
+    SC_time = load('results_dtdb/SC_time.mat').SC_time;
     
-    LS_error = load('results_svd/dtdb/LS_error.mat').LS_error;
-    LS_time = load('results_svd/dtdb/LS_time.mat').LS_time;
+    LS_error = load('results_dtdb/LS_error.mat').LS_error;
+    LS_time = load('results_dtdb/LS_time.mat').LS_time;
     
-    WLS_error = load('results_svd/dtdb/WLS_error.mat').WLS_error;
-    WLS_time = load('results_svd/dtdb/WLS_time.mat').WLS_time;
+    WLS_error = load('results_dtdb/WLS_error.mat').WLS_error;
+    WLS_time = load('results_dtdb/WLS_time.mat').WLS_time;
     
-    SOC_error = load('results_svd/dtdb/SOC_error.mat').SOC_error;
-    SOC_time = load('results_svd/dtdb/SOC_time.mat').SOC_time;
+    SOC_error = load('results_dtdb/SOC_error.mat').SOC_error;
+    SOC_time = load('results_dtdb/SOC_time.mat').SOC_time;
 end
 
-dataRoot = 'prepare_data/dtdb/prepared/';
+dataRoot = 'datasets/dtdb/prepared/';
 for seq = 0:285
     disp(['current seq ', num2str(seq)]);
     loc = [dataRoot, 'dtdb_', num2str(seq + 1), '.mat'];

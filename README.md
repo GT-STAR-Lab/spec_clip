@@ -7,6 +7,17 @@
 
 ## Code Instructions
 - Please download the dataset to your local directory.
+  - Please download the datasets through this [link](https://drive.google.com/file/d/15vat2GPVxLtt1fcNX-kAWZuD7Uie6l_m/view?usp=sharing).
+  - Extract datasets.zip in \spec_clip. The directory tree should be like:
+  
+    * \spec_clip
+       * ucsd.m
+       * dtdb.m
+       * kodex.m
+       * \datasets
+         * \ucsd
+         * \dtdb
+         * \kodex
 - Run ucsd.m with MATLAB. It will learn the linear dynamics of UCSD dataset with LS, SC, SOC, WLS and CG respectively. The script will automatically create a new directory \results_ucsd to save system matrices, training time and reconstruction error.
 - Run dtdb.m with MATLAB. It will learn the linear dynamics of DTDB dataset with LS, SC and SOC respectively. The script will automatically create a new directory \results_dtdb to save system matrices, training time and reconstruction error.
 - Run kodex.m with MATLAB. It will learn the linear dynamics of KODex dataset with LS, SC and SOC respectively. The script will automatically create a new directory \results_kodex to save system matrices, and training time.

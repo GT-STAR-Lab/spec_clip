@@ -59,7 +59,7 @@ CG_stability = zeros(254, 27);
 SOC_stability = zeros(254, 27);
 
 
-dataRoot = 'prepare_data/ucsd/ucsd_seq/';
+dataRoot = 'datasets/ucsd/ucsd_seq/';
 maximum = 0;
 minimum = 100;
 for seq = 0:253
