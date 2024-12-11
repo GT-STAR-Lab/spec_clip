@@ -8,7 +8,7 @@
 ## Code Instructions
 - Please download the dataset to your local directory.
   - Please download the datasets through this [link](https://drive.google.com/file/d/15vat2GPVxLtt1fcNX-kAWZuD7Uie6l_m/view?usp=sharing).
-  - Extract datasets.zip in \spec_clip. The directory tree should be like:
+  - Extract datasets.zip to \spec_clip. The directory tree should be like:
   
     * \spec_clip
        * ucsd.m
