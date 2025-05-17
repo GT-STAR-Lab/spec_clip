@@ -1,31 +1,4 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%   Description
-%
-%       This file uses experimental data from the Franka manipulator to 
-%       learn a LDS with inputs using different data-driven methods. In the 
-%       end, it saves LQR gains for all data-driven models. 
-%       The data-driven learning methods used are:
-%           1. Least-squares (LS) unconstrained (possibly unstable) A and B 
-%              matrix pair
-%           2. A learned matrix pair [A, B] with SUB, that simultaneously 
-%              learns a stable A, and a B matrix. 
-%           3. A learned matirx pair [A, B] with WLS, that learns a stable 
-%              A, without updating the least-squares B matrix solution. 
-%           4. A learned matrix pair [A,B] with CG, that learns a stable A, 
-%              without updating the least-squares B matrix solution.
-%
-%
-%
-%       Given experimental data from the Franka manipulator, the code:
-%           1. Combines all data (discontinuous) runs into one file
-%           2. Computes the least-squares solution
-%           3. Computes the SUB, WLS, and CG stable solutions
-%           4. Calculates LQR gains for each method
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-clear; close all; clc; system = 'Franka';
+clear; close all; clc;
 
 algorithms_path = '../../algorithms/'; % path for stable LDS algorithms
 save_directory = 'results_ucsd/';
@@ -63,7 +36,7 @@ dataRoot = 'datasets/ucsd/ucsd_seq/';
 maximum = 0;
 minimum = 100;
 for seq = 0:253
-    % disp(['current seq ', num2str(seq)]);
+    
     loc = [dataRoot, 'ucsdseq_', num2str(seq), '.mat'];
     data = load(loc).data;
     [~, l] = size(data);
@@ -167,12 +140,6 @@ for stateNum = [3:30, 3]
 
         save([save_directory, 'SOC_time.mat'], 'SOC_time');
 
-        % fprintf(' SOC   Max eigenvalue is : %.4f \n', maxeval_SUB);
-        % fprintf(' SOC   Reconstruction error : %.5f \n', e_SUB);    
-
-  %       %% Compute WLS (stable) [A, B] solution
-  %       fprintf('Computing stable A solution using WLS ... \n');
-  % 
         Pnew = [X_(:,1), Y_];
         [U_wls,S_wls,V_wls] = svd(Pnew,0);
 
@@ -191,14 +158,7 @@ for stateNum = [3:30, 3]
         save(fullfile(save_state_directory, 'WLS_error.mat'), "WLS_error");
         WLS_time(seq+1, stateNum - 2) = tWLS;
         save([save_directory, 'WLS_time.mat'], 'WLS_time');
-  % 
-  %       fprintf('    Max eigenvalue is : %.4f \n', max(abs(eig(A_WLS)) ));
-  %       fprintf('    Reconstruction error : %.5f \n', e_WLS);    
-  % % clearvars -except system
-  % 
-  %       %% Compute CG (stable) [A, B] solution
-  %       fprintf('Computing stable A using CG ... \n');
-  % 
+
         timeCG = tic;
         [CG, ~, ~, ~] = learnCGModel(X_, Y_, 1, 0);
         tCG = toc(timeCG);
@@ -213,9 +173,6 @@ for stateNum = [3:30, 3]
         save([save_directory, 'CG_time.mat'], 'CG_time');
         save([save_directory, 'CG_error.mat'], 'CG_error');
         save([save_directory, 'CG_stability.mat'], 'CG_stability');
-  % 
-  %       fprintf('    Max eigenvalue is : %.4f \n', maxeval_CG)
-  %       fprintf('    Reconstruction error : %.5f \n', e_CG);    
 
     end
 end

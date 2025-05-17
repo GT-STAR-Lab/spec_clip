@@ -1,31 +1,4 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%   Description
-%
-%       This file uses experimental data from the Franka manipulator to 
-%       learn a LDS with inputs using different data-driven methods. In the 
-%       end, it saves LQR gains for all data-driven models. 
-%       The data-driven learning methods used are:
-%           1. Least-squares (LS) unconstrained (possibly unstable) A and B 
-%              matrix pair
-%           2. A learned matrix pair [A, B] with SOC, that simultaneously 
-%              learns a stable A, and a B matrix. 
-%           3. A learned matirx pair [A, B] with WLS, that learns a stable 
-%              A, without updating the least-squares B matrix solution. 
-%           4. A learned matrix pair [A,B] with CG, that learns a stable A, 
-%              without updating the least-squares B matrix solution.
-%
-%
-%
-%       Given experimental data from the Franka manipulator, the code:
-%           1. Combines all data (discontinuous) runs into one file
-%           2. Computes the least-squares solution
-%           3. Computes the SOC, WLS, and CG stable solutions
-%           4. Calculates LQR gains for each method
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-clear; close all; clc; system = 'Franka';
+clear; close all; clc;
 
 algorithms_path = 'algorithms/'; % path for stable LDS algorithms
 save_directory = 'results_dtdb/';
