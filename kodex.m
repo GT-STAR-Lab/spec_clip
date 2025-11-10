@@ -22,30 +22,37 @@ data_paths = {
     % 'tool_truncated_to_31.mat',
     % 'tool_truncated_to_35.mat',
     'door.mat',
+    'pen.mat',
     };
 
 for i = 1:length(data_paths)
     name = data_paths{i}(1:end-4);
     load(fullfile(data_directory,data_paths{i}));
 
-    timeLS = tic;
-    LS = LDS(X.', Y.');
-    stored_var = whos();
-    memory_used_LS = 0;
-    for i = 1 : length(stored_var)
-        memory_used_LS = memory_used_LS + stored_var(i).bytes;
-    end
-    tLS = toc;
-
-    alg_name = 'ls';
-    experiment_name = [name, '_', alg_name, '_'];
-
-    save([save_directory, experiment_name, 'time', '.mat'], "tLS");
-    save([save_directory, experiment_name, 'mem', '.mat'], "memory_used_LS");    
-    save([save_directory, experiment_name, 'matrix', '.mat'], "LS");
-
-    disp('LS SAVED');
+    % % STEP1 uncomment for LS exp
+    % % start here
+    % timeLS = tic;
+    % LS = LDS(X.', Y.');
+    % stored_var = whos();
+    % memory_used_LS = 0;
+    % for i = 1 : length(stored_var)
+    %     memory_used_LS = memory_used_LS + stored_var(i).bytes;
+    % end
+    % tLS = toc;
+    % 
+    % alg_name = 'ls';
+    % experiment_name = [name, '_', alg_name, '_'];
+    % 
+    % save([save_directory, experiment_name, 'time', '.mat'], "tLS");
+    % save([save_directory, experiment_name, 'mem', '.mat'], "memory_used_LS");    
+    % save([save_directory, experiment_name, 'matrix', '.mat'], "LS");
+    % 
+    % disp('LS SAVED');
+    % 
+    % % end here
     
+    % % STEP2 uncomment for SC exp
+    % % start here
     % timeSC = tic;
     % LS = LDS(X.', Y.');
     % SC = eigenclip(LS, 1);
@@ -63,7 +70,10 @@ for i = 1:length(data_paths)
     % save([save_directory, experiment_name, 'matrix', '.mat'], "SC");
     % 
     % disp('SC SAVED');
-    % 
+    % % end here
+
+    % % STEP3 uncomment for SOC exp
+    % % start here
     % alg_name = 'soc';
     % experiment_name = [name, '_', alg_name, '_'];
     % 
@@ -71,6 +81,7 @@ for i = 1:length(data_paths)
     % Y_ = Y.';
     % 
     % timeSOC = tic;
+    % LS = LDS(X.', Y.');
     % [SOC, memory_used_SOC] = learnSOCmodelKnowingLS(X_, Y_, LS, options);
     % tSOC = toc(timeSOC);
     % 
@@ -79,5 +90,27 @@ for i = 1:length(data_paths)
     % save([save_directory, experiment_name, 'matrix', '.mat'], "SOC");
     % 
     % disp('SOC SAVED');
+    % % end here
+    
+    % % SC with eps, no time and mem exp needed, keep commented
+    % LS = LDS(X.', Y.');
+    % SCe5 = eigenclip(LS, 1 - 1e-5);
+    % 
+    % alg_name = 'SCe5';
+    % experiment_name = [name, '_', alg_name, '_'];
+    % 
+    % save([save_directory, experiment_name, 'matrix', '.mat'], "SCe5");
+    % 
+    % disp('SCe5 SAVED');
+    % 
+    % LS = LDS(X.', Y.');
+    % SCe2 = eigenclip(LS, 1 - 1e-2);
+    % 
+    % alg_name = 'SCe2';
+    % experiment_name = [name, '_', alg_name, '_'];
+    % 
+    % save([save_directory, experiment_name, 'matrix', '.mat'], "SCe2");
+    % 
+    % disp('SCe2 SAVED');
 
 end
